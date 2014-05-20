@@ -151,9 +151,6 @@ int printHelp(int argc, const char * argv[]) {
   
   NSLog(@"Usage: %@ -h", name);
   NSLog(@"       %@ -l", name);
-  NSLog(@"       %@ -c <device_name>", name);
-  NSLog(@"       %@ -c <device_name> [-s <sleep_time>]", name);
-  NSLog(@"       %@ -c <device_name> [-n <number_of_reads>]", name);
   NSLog(@"       %@ -c <device_name> [-s <sleep_time>] [-n <number_of_reads>]", name);
 
   
