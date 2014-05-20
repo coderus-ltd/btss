@@ -11,14 +11,15 @@ For a list of all available options run `./btss -h`:
 ```
 $ ./btss -h
 
-         Usage: btss -h
-                btss -l
-                btss -c <device_name> [-s <sleep_time>] [-n <number_of_reads>]
-                
-         -h                    Help
-         -l                    Lists all paired devices
-         -c <device_name>      Connect to a device with name
-         -s <sleep_time>       Milliseconds to sleep before a new rssi read
+	Usage: btss -h
+		   btss -l
+		   btss -c <device_name> [-s <num_reads_per_second>] [-t <time_duration>]
+		   
+    -h                          Help
+    -l                          Lists all paired devices
+    -c <device_name>            Connect to a device with name
+    -s <num_reads_per_second>   Number of rssi reads per second
+    -t <time_duration>          Total duration of rssi reads in seconds
 ```
 
 ### License

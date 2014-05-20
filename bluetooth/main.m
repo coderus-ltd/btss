@@ -47,8 +47,8 @@ int main(int argc, const char * argv[])
 int scanDevice(int argc, const char * argv[]) {
   //default values
   NSString *deviceName = nil;
-  NSInteger sleepTime = 0;
-  NSInteger numRssiValues = 0;
+  int numReadsPerSecond = 0;
+  int timeDuration = 0;
   
   //-c <device_name> [-s <sleep_time>] [-n <number_of_rssi_values>]
   if(argc <= 2 || argc % 2 == 0) {
@@ -66,16 +66,16 @@ int scanDevice(int argc, const char * argv[]) {
       deviceName = paramValue;
     }
     
-    //read number of rssi scans if available
-    if([paramName isEqualToString:@"-n"]) {
-      int aNumRssi = [paramValue intValue];
-      numRssiValues = (aNumRssi > 0 ? aNumRssi : 0);
+    //number of sample reads per second
+    if([paramName isEqualToString:@"-s"]) {
+      int aNumReads = [paramValue intValue];
+      numReadsPerSecond = aNumReads > 0 ? aNumReads : 0;
     }
     
-    //read sleep time if available
-    if([paramName isEqualToString:@"-s"]) {
-      int aSleepValue = [paramValue intValue];
-      sleepTime = aSleepValue > 0 ? aSleepValue : 0;
+    //Duration of rssi sample read in seconds
+    if([paramName isEqualToString:@"-t"]) {
+      int aTimeDuration = [paramValue intValue];
+      timeDuration = (aTimeDuration > 0 ? aTimeDuration : 0);
     }
   }
   
@@ -102,22 +102,35 @@ int scanDevice(int argc, const char * argv[]) {
         NSLog(@"Device not found");
         return -1;
       }
-
+      
+      int totalReads = 0;
+      float sleepTime = 0.0f;
+      
+      //setup while vars
+      if(numReadsPerSecond > 0 && timeDuration > 0) { //numReadsPerSecond and timeDuration set
+        totalReads = numReadsPerSecond * timeDuration;
+        sleepTime = 1.0f / numReadsPerSecond;
+      } else if(numReadsPerSecond > 0 && timeDuration == 0) { //numReadsPerSecond set
+        totalReads = 0;
+        sleepTime = 1.0f / numReadsPerSecond;
+      }
+      
       NSLog(@"Scanning...");
       NSLog(@"Name    :%@", deviceName );
       NSLog(@"Address :%@", IOBluetoothNSStringFromDeviceAddress( [device getAddress] ) );
       
-      int rssiReads = 0;
+      int countReads = 0;
       while ([device isConnected])
       {
-        NSLog(@" rssi %d - raw rssi %d", [device RSSI], [device rawRSSI]);
+        NSLog(@"rssi %d - raw rssi %d", [device RSSI], [device rawRSSI]);
         
-        if(sleepTime > 0) {
-          [NSThread sleepForTimeInterval: 0.001 * sleepTime];
+        if(sleepTime > 0.0f) { //
+          [NSThread sleepForTimeInterval:sleepTime];
         }
         
-        if(numRssiValues > 0) {
-          if(++rssiReads == numRssiValues) {
+        countReads++;
+        if(totalReads > 0) {
+          if(countReads == totalReads) {
             break;
           }
         }
@@ -149,16 +162,17 @@ int listDevices(int argc, const char * argv[]) {
 int printHelp(int argc, const char * argv[]) {
   NSString *name = [NSProcessInfo.processInfo.arguments[0] lastPathComponent];
   
+  NSLog(@"\n");
   NSLog(@"Usage: %@ -h", name);
   NSLog(@"       %@ -l", name);
-  NSLog(@"       %@ -c <device_name> [-s <sleep_time>] [-n <number_of_reads>]", name);
-
+  NSLog(@"       %@ -c <device_name> [-s <num_reads_per_second>] [-t <time_duration>]", name);
   
   NSLog(@"\n");
-  NSLog(@"-h                    Help");
-  NSLog(@"-c <device_name>      Connect to a device with name");
-  NSLog(@"-s <sleep_time>       Milliseconds to sleep before a new rssi read");
-  NSLog(@"-l                    Lists all paired devices");
+  NSLog(@"-h                          Help");
+  NSLog(@"-l                          Lists all paired devices");
+  NSLog(@"-c <device_name>            Connect to a device with name");
+  NSLog(@"-s <num_reads_per_second>   Number of rssi reads per second");
+  NSLog(@"-t <time_duration>          Total duration of rssi reads in seconds");
   
   return 0;
 }
