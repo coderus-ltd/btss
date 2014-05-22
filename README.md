@@ -22,5 +22,12 @@ $ ./btss -h
     -t <time_duration>          Total duration of rssi reads in seconds
 ```
 
+#### Return Codes
+The cli tool has in place exit return codes:
+```
+	0		Success
+   -1		Invalid Options/Invalid Parameters
+```
+
 ### License
 MIT
